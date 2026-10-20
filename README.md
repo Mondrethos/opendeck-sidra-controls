@@ -14,6 +14,9 @@ blank while it is not.
 | Close Sidra | quits Sidra |
 | Volume Down / Volume Up | changes Sidra's volume by 5%, the same step as Sidra's scroll wheel |
 | Mute | mutes or unmutes Sidra at once, leaving its volume alone; turns red while muted |
+| Restart Song | plays the current song from the start, also when it is paused |
+| Repeat Song | repeats the current song; turns amber while on, and another press stops repeating |
+| Repeat All | repeats the whole album, playlist or queue; turns amber while on, and another press stops repeating |
 
 The keys always control Sidra itself (`org.mpris.MediaPlayer2.sidra`), never
 whichever other media player happens to be playing.
@@ -22,6 +25,7 @@ whichever other media player happens to be playing.
 
 - Linux with a systemd user session (`busctl`)
 - PipeWire with WirePlumber and its PulseAudio server (`pactl`), for Mute
+- GLib's `gdbus`, for the repeat keys to show Sidra's repeat mode
 - OpenDeck 2.x
 - Node.js 20 or newer
 - Sidra
@@ -41,6 +45,11 @@ The actions appear in OpenDeck's action list under **Sidra**.
 ## How it works
 
 - Commands go to Sidra over MPRIS with `busctl --user`, except Mute.
+- Restart Song seeks back past the start of the song, which MPRIS puts at the
+  start, then plays.
+- Repeat Song and Repeat All set Sidra's MPRIS `LoopStatus` to `Track` or
+  `Playlist`, or back to `None`. They follow it with `gdbus monitor`, so a
+  repeat mode chosen in Sidra itself shows on the keys too.
 - Mute mutes Sidra's audio streams with `pactl`, as Plasma's volume mixer does,
   on key press rather than release. WirePlumber remembers the mute and applies
   it to the streams Sidra opens later, such as after a pause. The key also

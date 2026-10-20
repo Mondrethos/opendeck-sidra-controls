@@ -1,7 +1,7 @@
 {
   "Name": "Sidra Controls",
   "Author": "max",
-  "Version": "1.1.0",
+  "Version": "1.2.0",
   "Description": "Keys that control Sidra and stay blank while Sidra is not running.",
   "Icon": "icons/plugin",
   "Category": "Sidra",
@@ -74,6 +74,30 @@
       "Icon": "icons/mute",
       "DisableAutomaticStates": true,
       "States": [{ "Image": "icons/blank" }, { "Image": "icons/mute" }, { "Image": "icons/muted" }]
+    },
+    {
+      "UUID": "local.sidracontrols.restart",
+      "Name": "Restart Song",
+      "Tooltip": "Play the current song from the start",
+      "Icon": "icons/restart",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/restart" }]
+    },
+    {
+      "UUID": "local.sidracontrols.repeatsong",
+      "Name": "Repeat Song",
+      "Tooltip": "Repeat the current song, or stop repeating it",
+      "Icon": "icons/repeatsong",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/repeatsong" }, { "Image": "icons/repeatsong-on" }]
+    },
+    {
+      "UUID": "local.sidracontrols.repeatall",
+      "Name": "Repeat All",
+      "Tooltip": "Repeat the whole album, playlist or queue, or stop repeating it",
+      "Icon": "icons/repeatall",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/repeatall" }, { "Image": "icons/repeatall-on" }]
     }
   ]
 }
