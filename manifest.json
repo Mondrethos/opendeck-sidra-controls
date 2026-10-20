@@ -1,0 +1,71 @@
+{
+  "Name": "Sidra Controls",
+  "Author": "max",
+  "Version": "1.0.0",
+  "Description": "Keys that control Sidra over MPRIS and stay blank while Sidra is not running.",
+  "Icon": "icons/plugin",
+  "Category": "Sidra",
+  "CategoryIcon": "icons/plugin",
+  "CodePath": "plugin.mjs",
+  "OS": [{ "Platform": "linux" }],
+  "ApplicationsToMonitor": { "linux": ["sidra"] },
+  "SDKVersion": 2,
+  "Actions": [
+    {
+      "UUID": "local.sidracontrols.previous",
+      "Name": "Previous",
+      "Tooltip": "Previous track in Sidra",
+      "Icon": "icons/previous",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/previous" }]
+    },
+    {
+      "UUID": "local.sidracontrols.playpause",
+      "Name": "Play/Pause",
+      "Tooltip": "Play or pause Sidra",
+      "Icon": "icons/playpause",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/playpause" }]
+    },
+    {
+      "UUID": "local.sidracontrols.next",
+      "Name": "Next",
+      "Tooltip": "Next track in Sidra",
+      "Icon": "icons/next",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/next" }]
+    },
+    {
+      "UUID": "local.sidracontrols.stop",
+      "Name": "Stop",
+      "Tooltip": "Stop playback in Sidra",
+      "Icon": "icons/stop",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/stop" }]
+    },
+    {
+      "UUID": "local.sidracontrols.quit",
+      "Name": "Close Sidra",
+      "Tooltip": "Quit Sidra",
+      "Icon": "icons/quit",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/quit" }]
+    },
+    {
+      "UUID": "local.sidracontrols.volumedown",
+      "Name": "Volume Down",
+      "Tooltip": "Lower Sidra's volume by 5%",
+      "Icon": "icons/volumedown",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/volumedown" }]
+    },
+    {
+      "UUID": "local.sidracontrols.volumeup",
+      "Name": "Volume Up",
+      "Tooltip": "Raise Sidra's volume by 5%",
+      "Icon": "icons/volumeup",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/volumeup" }]
+    }
+  ]
+}
