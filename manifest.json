@@ -1,8 +1,8 @@
 {
   "Name": "Sidra Controls",
   "Author": "max",
-  "Version": "1.0.0",
-  "Description": "Keys that control Sidra over MPRIS and stay blank while Sidra is not running.",
+  "Version": "1.1.0",
+  "Description": "Keys that control Sidra and stay blank while Sidra is not running.",
   "Icon": "icons/plugin",
   "Category": "Sidra",
   "CategoryIcon": "icons/plugin",
@@ -66,6 +66,14 @@
       "Icon": "icons/volumeup",
       "DisableAutomaticStates": true,
       "States": [{ "Image": "icons/blank" }, { "Image": "icons/volumeup" }]
+    },
+    {
+      "UUID": "local.sidracontrols.mute",
+      "Name": "Mute",
+      "Tooltip": "Mute or unmute Sidra",
+      "Icon": "icons/mute",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/mute" }, { "Image": "icons/muted" }]
     }
   ]
 }

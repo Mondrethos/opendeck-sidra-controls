@@ -13,6 +13,7 @@ blank while it is not.
 | Stop | stops playback |
 | Close Sidra | quits Sidra |
 | Volume Down / Volume Up | changes Sidra's volume by 5%, the same step as Sidra's scroll wheel |
+| Mute | mutes or unmutes Sidra at once, leaving its volume alone; turns red while muted |
 
 The keys always control Sidra itself (`org.mpris.MediaPlayer2.sidra`), never
 whichever other media player happens to be playing.
@@ -20,6 +21,7 @@ whichever other media player happens to be playing.
 ## Requirements
 
 - Linux with a systemd user session (`busctl`)
+- PipeWire with WirePlumber and its PulseAudio server (`pactl`), for Mute
 - OpenDeck 2.x
 - Node.js 20 or newer
 - Sidra
@@ -38,7 +40,11 @@ The actions appear in OpenDeck's action list under **Sidra**.
 
 ## How it works
 
-- Commands go to Sidra over MPRIS with `busctl --user`.
+- Commands go to Sidra over MPRIS with `busctl --user`, except Mute.
+- Mute mutes Sidra's audio streams with `pactl`, as Plasma's volume mixer does,
+  on key press rather than release. WirePlumber remembers the mute and applies
+  it to the streams Sidra opens later, such as after a pause. The key also
+  follows mutes made elsewhere, such as in the mixer.
 - Sidra counts as running while a live process named `sidra` exists. Zombie
   processes are ignored: OpenDeck's Launch App plugin never reaps the programs
   it starts, so a Sidra opened from a Launch App key lingers as a zombie after
@@ -63,4 +69,5 @@ Multi Actions instead:
 `icons/plugin.png` is Sidra's application icon from
 [wimpysworld/sidra](https://github.com/wimpysworld/sidra), licensed under the
 [Blue Oak Model License 1.0.0](https://blueoakcouncil.org/license/1.0.0). The
-other icons were drawn for this plugin in Sidra's colours.
+other icons were drawn for this plugin in Sidra's colours, apart from the red of
+Mute's muted state.
