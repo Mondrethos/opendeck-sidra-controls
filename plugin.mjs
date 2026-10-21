@@ -1,7 +1,8 @@
 // Sidra Controls: OpenDeck keys that control Sidra. Each key stays blank (state 0) while
 // Sidra is not running and shows its control (state 1) while it is. Mute, Repeat Song and
-// Repeat All show state 2 while they are on. OpenDeck lets only its Starter Pack switch
-// profiles, so a Sidra page is reached through Multi Actions instead (see README.md).
+// Repeat All show state 2 while they are on, and Artwork shows the current song's artwork.
+// OpenDeck lets only its Starter Pack switch profiles, so a Sidra page is reached through
+// Multi Actions instead (see README.md).
 import { execFile, spawn } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import { createInterface } from "node:readline";
@@ -19,6 +20,7 @@ const REPEAT_SONG = "local.sidracontrols.repeatsong";
 const REPEAT_ALL = "local.sidracontrols.repeatall";
 // The MPRIS LoopStatus that each repeat key turns on.
 const REPEATS = { [REPEAT_SONG]: "Track", [REPEAT_ALL]: "Playlist" };
+const ARTWORK = "local.sidracontrols.artwork";
 
 const run = (command, ...args) =>
   new Promise((resolve) => {
@@ -58,6 +60,27 @@ async function toggleRepeat(action) {
   const current = (await loopStatus()) ?? status.loop;
   await busctl("set-property", ...PLAYER, PLAYBACK, "LoopStatus", "s", current === mode ? "None" : mode);
   refreshLoop();
+}
+
+// The current song's artwork: first Apple's address for it and, once Sidra has downloaded
+// the picture, a file in Sidra's cache. Without a song there is none ("").
+async function artUrl() {
+  const reply = await busctl("get-property", ...PLAYER, PLAYBACK, "Metadata");
+  return reply?.match(/"mpris:artUrl" s "([^"]*)"/)?.[1] ?? "";
+}
+
+// OpenDeck takes a key image as a data URL and scales it to the key itself.
+async function loadArt(url) {
+  let bytes;
+  if (url.startsWith("file://")) {
+    bytes = await readFile(new URL(url));
+  } else {
+    const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    bytes = Buffer.from(await response.arrayBuffer());
+  }
+  // Sidra's artwork is JPEG; a PNG is told apart by its signature.
+  return `data:image/${bytes[0] === 0x89 ? "png" : "jpeg"};base64,${bytes.toString("base64")}`;
 }
 
 const commands = {
@@ -111,7 +134,8 @@ async function sidraRunning() {
 }
 
 const keys = new Map(); // context → action
-const status = { running: false, muted: false, loop: "None" };
+const status = { running: false, muted: false, loop: "None", art: "" };
+let artImage = ""; // status.art as a data URL, or "" for the music note
 // Whether each toggle key is on, showing state 2.
 const on = {
   [MUTE]: () => status.muted,
@@ -123,18 +147,25 @@ const show = (context) => {
   const state = !status.running ? 0 : on[keys.get(context)]?.() ? 2 : 1;
   socket.send(JSON.stringify({ event: "setState", context, payload: { state } }));
 };
+// Artwork's state 1 shows the artwork; an empty image puts the music note back.
+const showArt = (context) =>
+  socket.send(JSON.stringify({ event: "setImage", context, payload: { image: artImage, state: 1 } }));
 
 const describe = {
   running: (running) => `Sidra ${running ? "is running: showing" : "stopped: blanking"} ${keys.size} keys`,
   muted: (muted) => `Sidra ${muted ? "muted" : "unmuted"}`,
   loop: (loop) => `Sidra repeat: ${loop}`,
+  art: (art) => `Sidra artwork: ${art || "none"}`,
 };
 const update = (changes) => {
   const changed = Object.keys(changes).filter((name) => changes[name] !== status[name]);
   if (!changed.length) return;
   Object.assign(status, changes);
   changed.forEach((name) => console.log(describe[name](status[name])));
-  keys.forEach((_, context) => show(context));
+  keys.forEach((action, context) => {
+    if (action === ARTWORK && changed.includes("art")) showArt(context);
+    show(context);
+  });
 };
 
 // Serialized, so checks triggered by bursts of events cannot interleave.
@@ -148,6 +179,14 @@ const refreshMute = () =>
   serially(async () => {
     const streams = await sidraStreams();
     update({ muted: streams.length ? streams.every((stream) => stream.mute) : status.muted });
+  });
+// A picture that fails to load leaves the music note until the next song.
+const refreshArt = () =>
+  serially(async () => {
+    const art = await artUrl();
+    if (art === status.art) return;
+    artImage = art ? await loadArt(art).catch((error) => (console.log(`artwork ${art}: ${error.message}`), "")) : "";
+    update({ art });
   });
 
 // Monitors that print a line per event. One that exits, because its server restarted or
@@ -172,11 +211,15 @@ const streamEvent = (line) => {
   pending = setTimeout(refreshMute, 50);
 };
 // gdbus reports Sidra appearing on the bus, including when gdbus starts, and its repeat
-// mode changing, here or in Sidra.
+// mode and song changing, here or in Sidra.
 const sidraSignal = (line) => {
   const loop = line.match(/'LoopStatus': <'(\w+)'>/)?.[1];
   if (loop) serially(async () => update({ loop }));
-  else if (line.includes(" is owned by ")) refreshLoop();
+  if (line.includes("'Metadata'")) refreshArt();
+  if (line.includes(" is owned by ")) {
+    refreshLoop();
+    refreshArt();
+  }
 };
 
 socket.addEventListener("open", () => {
@@ -190,6 +233,7 @@ socket.addEventListener("message", ({ data }) => {
   const { event, action, context } = JSON.parse(data);
   if (event === "willAppear") {
     keys.set(context, action);
+    if (action === ARTWORK) showArt(context);
     show(context);
   } else if (event === "willDisappear") {
     keys.delete(context);

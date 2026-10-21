@@ -1,7 +1,7 @@
 {
   "Name": "Sidra Controls",
   "Author": "max",
-  "Version": "1.2.0",
+  "Version": "1.3.0",
   "Description": "Keys that control Sidra and stay blank while Sidra is not running.",
   "Icon": "icons/plugin",
   "Category": "Sidra",
@@ -98,6 +98,14 @@
       "Icon": "icons/repeatall",
       "DisableAutomaticStates": true,
       "States": [{ "Image": "icons/blank" }, { "Image": "icons/repeatall" }, { "Image": "icons/repeatall-on" }]
+    },
+    {
+      "UUID": "local.sidracontrols.artwork",
+      "Name": "Artwork",
+      "Tooltip": "Show the current song's artwork",
+      "Icon": "icons/artwork",
+      "DisableAutomaticStates": true,
+      "States": [{ "Image": "icons/blank" }, { "Image": "icons/artwork" }]
     }
   ]
 }
